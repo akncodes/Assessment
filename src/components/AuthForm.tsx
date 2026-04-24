@@ -139,9 +139,13 @@ export function AuthForm() {
 
     setLoading(true);
     try {
+      const emailRedirectTo = `${window.location.origin}/auth/callback?next=/dashboard`;
       const { data, error } = await supabase.auth.signUp({
         email: credentials.normalizedEmail,
         password: credentials.password,
+        options: {
+          emailRedirectTo,
+        },
       });
       if (isRateLimitError(error)) {
         startSignupCooldown(SIGNUP_COOLDOWN_SECONDS);
