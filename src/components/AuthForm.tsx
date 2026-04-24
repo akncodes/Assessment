@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { hasSupabaseEnv } from "@/lib/env";
+import { getSupabaseSiteUrl, hasSupabaseEnv } from "@/lib/env";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 function isValidEmail(value: string) {
@@ -53,8 +53,6 @@ function isRateLimitError(error: { message?: string; status?: number } | null) {
 
 const SIGNUP_COOLDOWN_SECONDS = 15;
 const SIGNUP_COOLDOWN_UNTIL_KEY = "auth_signup_cooldown_until";
-const DEFAULT_SITE_URL = "https://assessment1-sooty-chi.vercel.app";
-
 export function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -138,9 +136,7 @@ export function AuthForm() {
       return;
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-    const redirectBase = siteUrl && siteUrl.length > 0 ? siteUrl : DEFAULT_SITE_URL;
-    const emailRedirectTo = `${redirectBase.replace(/\/$/, "")}/`;
+    const emailRedirectTo = `${getSupabaseSiteUrl().replace(/\/$/, "")}/`;
 
     setLoading(true);
     try {
