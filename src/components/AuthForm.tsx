@@ -51,7 +51,7 @@ function isRateLimitError(error: { message?: string; status?: number } | null) {
   return Boolean(error && (error.status === 429 || error.message?.toLowerCase().includes("rate limit")));
 }
 
-const SIGNUP_COOLDOWN_SECONDS = 60;
+const SIGNUP_COOLDOWN_SECONDS = 15;
 const SIGNUP_COOLDOWN_UNTIL_KEY = "auth_signup_cooldown_until";
 
 export function AuthForm() {
@@ -137,11 +137,18 @@ export function AuthForm() {
       return;
     }
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+    const redirectBase = siteUrl && siteUrl.length > 0 ? siteUrl : window.location.origin;
+    const emailRedirectTo = `${redirectBase.replace(/\/$/, "")}/`;
+
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
         email: credentials.normalizedEmail,
         password: credentials.password,
+        options: {
+          emailRedirectTo,
+        },
       });
       if (isRateLimitError(error)) {
         startSignupCooldown(SIGNUP_COOLDOWN_SECONDS);
